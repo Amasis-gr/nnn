@@ -6141,11 +6141,15 @@ static void handle_screen_move(enum action sel)
 
 static void handle_openwith(const char *path, const char *name, char *newpath, char *tmp)
 {
-	/* Confirm if app is CLI or GUI */
-	int r = get_input(messages[MSG_CLI_MODE]);
-
-	r = (r == 'c' ? F_CLI :
-	     ((r == 'g' || r == '\r') ? (F_NOWAIT | F_NOTRACE | F_MULTI) : 0));
+	int r;
+	
+	if (getenv("NNN_CLI_ONLY")) r = F_CLI;
+	else {
+		/* Confirm if app is CLI or GUI */
+		r = get_input(messages[MSG_CLI_MODE]);
+		r = (r == 'c' ? F_CLI : ((r == 'g' || r == '\r') ? (F_NOWAIT | F_NOTRACE | F_MULTI) : 0));
+	}
+	
 	if (r) {
 		mkpath(path, name, newpath);
 		spawn(tmp, newpath, NULL, NULL, r);
